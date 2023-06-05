@@ -34,6 +34,15 @@ let HightMapBufCounter  = 0;
 let MaxHightMapBufCounter = 200; // determine how many frame to update CPU buffer of terrain hight map for ray casting on CPU
 let simres : number = simresolution;
 
+const k_sand = 0.2;
+const k_silt = 0.3;
+const k_clay = 0.5;
+const k_ph = 0.071;
+const k_organic = 1;
+
+const K_c = 0.49;
+const K_s = 0.066;
+const K_d = 0.0333
 
 
 //  (for backup)
@@ -91,7 +100,6 @@ const controlscomp = {
     enableBilateralBlur : true,
     AdvectionMethod : 1,
     SimulationResolution : simres,
-
 };
 
 
@@ -101,6 +109,11 @@ const controls = {
     Kc : 0.06,
     Ks : 0.036,
     Kd : 0.006,
+    Sand : 0.0,
+    Silt : 0.0,
+    Clay : 0.0,
+    pH: 7,
+    Organic: 0.5,
     timestep : 0.05,
     pipeAra :  0.6,
     ErosionMode : 0, // 0 river erosion, 1 : mountain erosion, 2 : polygonal mode
@@ -1047,7 +1060,7 @@ function LE_recreate_texture(w : number, h : number, samplingType : number, texH
     gl_context.texParameteri(gl_context.TEXTURE_2D, gl_context.TEXTURE_MAG_FILTER, samplingType);
     gl_context.texParameteri(gl_context.TEXTURE_2D, gl_context.TEXTURE_WRAP_S, gl_context.CLAMP_TO_EDGE);
     gl_context.texParameteri(gl_context.TEXTURE_2D, gl_context.TEXTURE_WRAP_T, gl_context.CLAMP_TO_EDGE);
-}
+} 
 
 function LE_create_screen_texture(w : number, h : number, samplingType : number){
     let new_tex = gl_context.createTexture();
@@ -1231,6 +1244,8 @@ function main() {
     var simcontrols = gui.addFolder('Simulation Controls');
     simcontrols.add(controls,'Pause/Resume');
     simcontrols.add(controls,'SimulationSpeed',{fast:3,medium : 2, slow : 1});
+    // simcontrols.add(controls, 'Type1');
+    // simcontrols.add(controls, 'Type2');
     simcontrols.open();
     var terrainParameters = gui.addFolder('Terrain Parameters');
     terrainParameters.add(controls,'SimulationResolution',{256 : 256 , 512 : 512, 1024 : 1024, 2048 : 2048} );
@@ -1249,9 +1264,14 @@ function main() {
     erosionpara.add(controls, 'ErosionMode', {RiverMode : 0, MountainMode : 1, PolygonalMode : 2});
     erosionpara.add(controls, 'VelocityAdvectionMag', 0.0, 0.5);
     erosionpara.add(controls, 'EvaporationConstant', 0.0001, 0.08);
-    erosionpara.add(controls,'Kc', 0.01,0.5);
-    erosionpara.add(controls,'Ks', 0.001,0.2);
-    erosionpara.add(controls,'Kd', 0.0001,0.1);
+    // erosionpara.add(controls,'Kc', 0.01,0.5);
+    // erosionpara.add(controls,'Ks', 0.001,0.2);
+    // erosionpara.add(controls,'Kd', 0.0001,0.1);
+    erosionpara.add(controls, 'Sand', 0.0, 1.0);
+    erosionpara.add(controls, 'Silt', 0.0, 1.0);
+    erosionpara.add(controls, 'Clay', 0.0, 1.0);
+    erosionpara.add(controls, 'pH', 0, 14);
+    erosionpara.add(controls, 'Organic', 0, 1.0);
     //erosionpara.add(controls,'AdvectionSpeedScaling', 0.1, 1.0);
     erosionpara.add(controls, 'TerrainDebug', {noDebugView : 0, sediment : 1, velocity : 2, velocityHeatmap : 9, terrain : 3, flux : 4, terrainflux : 5, maxslippage : 6, flowMap : 7, spikeDiffusion : 8});
     erosionpara.add(controls, 'AdvectionMethod', {Semilagrangian : 0, MacCormack : 1});
@@ -1540,6 +1560,12 @@ function main() {
     let pos = vec2.fromValues(0.0, 0.0);
     pos = rayCast(ro, dir);
     controls.posTemp = pos;
+
+    // Kc, Ks, Kd 
+
+    controls.Kc = K_c * (0.6 * controls.Silt + 0.3 * controls.Clay + 0.1 * controls.Sand) + 0.01;
+    controls.Ks = K_s * ((0.6 * controls.Clay + 0.3 * controls.Silt + 0.1 * controls.Sand) + k_ph * controls.pH + controls.Organic) + 0.001;
+    controls.Kd = K_d * ((0.6 * controls.Sand + 0.2 * controls.Silt + 0.2 * controls.Clay) + (1 - k_ph * controls.pH) + (1 - controls.Organic)) + 0.0001;
 
     //===================per tick uniforms==================
 

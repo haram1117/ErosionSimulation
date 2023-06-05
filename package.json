@@ -8,18 +8,22 @@
     "@types/gl-matrix": "^2.4.5",
     "@types/node": "^9.6.61",
     "@types/webgl2": "0.0.2",
-    "ts-loader": "^3.2.0",
     "typescript": "^4.3.4",
-    "webpack": "^3.10.0",
+    "webgl-strict-types": "^1.0.5",
+    "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^2.11.5",
     "webpack-glsl-loader": "^1.0.1"
   },
   "dependencies": {
     "dat-gui": "^0.5.0",
+    "dat.gui": "^0.7.9",
     "gl-matrix": "^2.4.0",
     "mouse-change": "^1.4.0",
+    "requirejs": "^2.3.6",
     "stats-js": "^1.0.1",
     "three": "^0.125.2",
-    "three-orbitcontrols": "^2.110.3"
+    "three-orbitcontrols": "^2.110.3",
+    "ts-loader": "3.5",
+    "webpack": "3.12"
   }
 }

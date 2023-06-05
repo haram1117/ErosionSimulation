@@ -8,7 +8,7 @@ module.exports = {
     publicPath: 'dist/',
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.ts$/,
         use: 'ts-loader',
@@ -26,6 +26,6 @@ module.exports = {
   devtool: 'source-map',
   devServer: {
     port: 5660,
-    overlay: true,
+    // overlay: false,
   },
 };
